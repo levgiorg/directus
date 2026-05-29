@@ -98,15 +98,14 @@ vi.mock('../../database/errors/translate.js', () => ({
 
 const mockVerifyClientAssertion = vi.fn();
 
-vi.mock('./jwks.js', () => ({
-	ASSERTION_CLOCK_TOLERANCE_SECONDS: 60,
-	verifyClientAssertion: (...args: unknown[]) => mockVerifyClientAssertion(...args),
-	JwksVerificationError: class JwksVerificationError extends Error {
-		constructor() {
-			super('Client authentication failed');
-		}
-	},
-}));
+vi.mock('./jwks.js', async (importOriginal) => {
+	const actual = await importOriginal<typeof import('./jwks.js')>();
+
+	return {
+		...actual,
+		verifyClientAssertion: (...args: unknown[]) => mockVerifyClientAssertion(...args),
+	};
+});
 
 const consentKey = crypto.createHmac('sha256', TEST_SECRET).update('mcp-oauth-consent-v1').digest();
 

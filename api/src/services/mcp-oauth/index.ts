@@ -19,7 +19,7 @@ import { transaction } from '../../utils/transaction.js';
 import { Url } from '../../utils/url.js';
 import { ActivityService } from '../activity.js';
 import { type CimdMetadata, detectClientIdType, fetchCimdMetadata, getAllowedDomains } from './cimd.js';
-import { ASSERTION_CLOCK_TOLERANCE_SECONDS, verifyClientAssertion } from './jwks.js';
+import { ASSERTION_CLOCK_TOLERANCE_SECONDS, ASSERTION_MAX_BYTES, verifyClientAssertion } from './jwks.js';
 import { OAuthError } from './types/error.js';
 import { isDomainAllowed } from './utils/domain.js';
 import { matchRedirectUri, validateRedirectUri } from './utils/redirect.js';
@@ -32,7 +32,6 @@ export { validateRedirectUri } from './utils/redirect.js';
 
 const DEFAULT_UNUSED_CLIENT_TTL_MS = 3 * 24 * 60 * 60 * 1000; // 3d -- matches env default
 const DEFAULT_CIMD_TTL_MS = 3_600_000; // 1 hour
-const ASSERTION_MAX_BYTES = 16 * 1024;
 const CLIENT_ID_MAX_LENGTH = 255;
 const ASSERTION_REPLAY_MARKER_EXTRA_TTL_SECONDS = 5;
 const MAX_REDIRECT_URIS = 10;

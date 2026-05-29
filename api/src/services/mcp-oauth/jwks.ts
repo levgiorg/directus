@@ -11,7 +11,8 @@ import { OAuthError } from './types/error.js';
 import { fetchExternalJson } from './utils/external-json.js';
 import { JwksUriValidationError, validateJwksUri as validateJwksUriPolicy } from './utils/jwks-uri.js';
 
-const ASSERTION_MAX_BYTES = 16 * 1024;
+export const ASSERTION_MAX_BYTES = 16 * 1024;
+
 const JWKS_MAX_BYTES = 32 * 1024;
 const JWKS_TIMEOUT_MS = 3_000;
 const POSITIVE_CACHE_TTL_MS = 5 * 60 * 1000;
