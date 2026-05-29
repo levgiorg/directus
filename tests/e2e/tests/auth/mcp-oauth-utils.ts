@@ -1,7 +1,6 @@
 import crypto from 'node:crypto';
 import http from 'node:http';
 import { port } from '@utils/constants.js';
-import { type CryptoKey, exportJWK, generateKeyPair, type JWK, SignJWT } from 'jose';
 
 export const baseUrl = `http://127.0.0.1:${port}`;
 export const adminToken = 'admin';
@@ -22,7 +21,6 @@ export type OAuthTokens = {
 };
 
 export type ConfidentialAuthMethod = 'client_secret_basic' | 'client_secret_post';
-export const CLIENT_ASSERTION_TYPE_JWT_BEARER = 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer';
 
 export type RegisteredConfidentialClient = {
 	clientId: string;
@@ -33,7 +31,6 @@ export type RegisteredConfidentialClient = {
 
 export type CimdMetadataServerOptions = {
 	path?: string;
-	jwksPath?: string;
 };
 
 type JsonValue = Record<string, unknown> | unknown[];
@@ -45,27 +42,14 @@ export class CimdMetadataServer {
 	private requestCount = 0;
 	private etag: string | null = null;
 	private readonly servePath: string;
-	private readonly jwksPath: string;
-	private jwks: Record<string, unknown> | undefined;
 
 	constructor(opts: CimdMetadataServerOptions = {}) {
 		this.servePath = opts.path ?? `/metadata-${crypto.randomUUID()}.json`;
-		this.jwksPath = opts.jwksPath ?? `/jwks-${crypto.randomUUID()}.json`;
 	}
 
 	async start(): Promise<void> {
 		await new Promise<void>((resolve, reject) => {
 			this.server = http.createServer((req, res) => {
-				if (req.url === this.jwksPath && this.jwks) {
-					res.writeHead(200, {
-						'Content-Type': 'application/json',
-						'Cache-Control': 'max-age=3600',
-					});
-
-					res.end(JSON.stringify(this.jwks));
-					return;
-				}
-
 				if (req.url !== this.servePath) {
 					res.writeHead(404);
 					res.end();
@@ -133,10 +117,6 @@ export class CimdMetadataServer {
 		return `${this.getUrl()}${this.servePath}`;
 	}
 
-	getJwksUri(): string {
-		return `${this.getUrl()}${this.jwksPath}`;
-	}
-
 	getRequestCount(): number {
 		return this.requestCount;
 	}
@@ -147,10 +127,6 @@ export class CimdMetadataServer {
 
 	setMetadata(doc: Record<string, unknown>): void {
 		this.metadata = doc;
-	}
-
-	setJwks(doc: Record<string, unknown>): void {
-		this.jwks = doc;
 	}
 
 	setEtag(etag: string | null): void {
@@ -167,45 +143,6 @@ export class CimdMetadataServer {
 			...overrides,
 		};
 	}
-}
-
-export async function generatePrivateKeyJwtKeyPair(kid = `key-${crypto.randomUUID()}`): Promise<{
-	kid: string;
-	privateKey: CryptoKey;
-	publicJwk: JWK;
-}> {
-	const { privateKey, publicKey } = await generateKeyPair('RS256', { extractable: true });
-	const publicJwk = await exportJWK(publicKey);
-
-	return {
-		kid,
-		privateKey,
-		publicJwk: {
-			...publicJwk,
-			kid,
-			alg: 'RS256',
-			use: 'sig',
-		},
-	};
-}
-
-export async function signPrivateKeyJwtAssertion(args: {
-	clientId: string;
-	audience: string;
-	privateKey: CryptoKey;
-	kid: string;
-	expiresInSeconds?: number;
-}): Promise<string> {
-	const issuedAt = Math.floor(Date.now() / 1000);
-
-	return await new SignJWT({ jti: crypto.randomUUID() })
-		.setProtectedHeader({ alg: 'RS256', kid: args.kid, typ: 'JWT' })
-		.setIssuer(args.clientId)
-		.setSubject(args.clientId)
-		.setAudience(args.audience)
-		.setIssuedAt(issuedAt)
-		.setExpirationTime(issuedAt + (args.expiresInSeconds ?? 120))
-		.sign(args.privateKey);
 }
 
 export function generatePKCE(): Pkce {
@@ -532,7 +469,6 @@ export async function exchangeCode(args: {
 	redirectUri: string;
 	codeVerifier: string;
 	clientSecret?: string;
-	clientAssertion?: string;
 	authorizationHeader?: string;
 	apiUrl?: string;
 }): Promise<OAuthTokens> {
@@ -550,11 +486,6 @@ export async function exchangeCode(args: {
 	if (args.clientId) body['client_id'] = args.clientId;
 	if (args.clientSecret) body['client_secret'] = args.clientSecret;
 
-	if (args.clientAssertion) {
-		body['client_assertion_type'] = CLIENT_ASSERTION_TYPE_JWT_BEARER;
-		body['client_assertion'] = args.clientAssertion;
-	}
-
 	const response = await postForm('/mcp-oauth/token', body, headers ? { headers } : undefined, apiUrl);
 
 	return (await expectJsonResponse(response, 200)) as OAuthTokens;
@@ -564,7 +495,6 @@ export async function refreshToken(args: {
 	clientId?: string;
 	refreshToken: string;
 	clientSecret?: string;
-	clientAssertion?: string;
 	authorizationHeader?: string;
 	apiUrl?: string;
 }): Promise<Response> {
@@ -580,11 +510,6 @@ export async function refreshToken(args: {
 	if (args.clientId) body['client_id'] = args.clientId;
 	if (args.clientSecret) body['client_secret'] = args.clientSecret;
 
-	if (args.clientAssertion) {
-		body['client_assertion_type'] = CLIENT_ASSERTION_TYPE_JWT_BEARER;
-		body['client_assertion'] = args.clientAssertion;
-	}
-
 	return postForm('/mcp-oauth/token', body, headers ? { headers } : undefined, apiUrl);
 }
 
@@ -592,7 +517,6 @@ export async function revokeToken(args: {
 	clientId?: string;
 	token: string;
 	clientSecret?: string;
-	clientAssertion?: string;
 	authorizationHeader?: string;
 	apiUrl?: string;
 }): Promise<Response> {
@@ -603,11 +527,6 @@ export async function revokeToken(args: {
 
 	if (args.clientId) body['client_id'] = args.clientId;
 	if (args.clientSecret) body['client_secret'] = args.clientSecret;
-
-	if (args.clientAssertion) {
-		body['client_assertion_type'] = CLIENT_ASSERTION_TYPE_JWT_BEARER;
-		body['client_assertion'] = args.clientAssertion;
-	}
 
 	return postForm('/mcp-oauth/revoke', body, headers ? { headers } : undefined, apiUrl);
 }
