@@ -2,6 +2,7 @@ import { useEnv } from '@directus/env';
 import {
 	decodeProtectedHeader,
 	importJWK,
+	errors as joseErrors,
 	type JWK,
 	type JWTPayload,
 	jwtVerify,
@@ -34,7 +35,8 @@ export type JwksVerificationFailureReason =
 	| 'jwks_fetch_failed'
 	| 'invalid_jwks'
 	| 'no_matching_key'
-	| 'bad_signature';
+	| 'bad_signature'
+	| 'verification_failed';
 
 export class JwksVerificationError extends OAuthError {
 	constructor(public reason: JwksVerificationFailureReason) {
@@ -132,7 +134,19 @@ export async function verifyClientAssertion(options: VerifyClientAssertionOption
 		return { header: protectedHeader, payload, claims };
 	} catch (err) {
 		if (err instanceof JwksVerificationError) throw err;
-		throw new JwksVerificationError('bad_signature');
+
+		if (err instanceof joseErrors.JWSSignatureVerificationFailed) {
+			throw new JwksVerificationError('bad_signature');
+		}
+
+		// jose throws JWTExpired (sibling of JWTClaimValidationFailed) for past-exp and past-iat checks, so list it
+		// explicitly. Both cases are honest claim failures; conflating them with signature failures would lie in audit
+		// logs.
+		if (err instanceof joseErrors.JWTExpired || err instanceof joseErrors.JWTClaimValidationFailed) {
+			throw new JwksVerificationError('invalid_claims');
+		}
+
+		throw new JwksVerificationError('verification_failed');
 	}
 }
 

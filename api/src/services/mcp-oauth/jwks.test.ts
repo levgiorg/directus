@@ -1,4 +1,4 @@
-import { exportJWK, generateKeyPair, type JWK, SignJWT } from 'jose';
+import { CompactSign, exportJWK, generateKeyPair, type JWK, SignJWT } from 'jose';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { OAuthError } from './types/error.js';
 
@@ -437,8 +437,38 @@ describe('verifyClientAssertion', () => {
 
 		await expectInvalidClient(
 			verify(await signCustomAssertion({ payload: { jti: crypto.randomUUID() }, ...options })),
-			'bad_signature',
+			'invalid_claims',
 		);
+	});
+
+	it('rejects assertions whose exp is in the past beyond the clock tolerance', async () => {
+		mockJwks([publicJwk]);
+		const issuedAt = Math.floor(now.getTime() / 1000) - 300;
+
+		await expectInvalidClient(
+			verify(
+				await signCustomAssertion({
+					payload: { jti: 'expired' },
+					issuedAt,
+					expirationTime: issuedAt + 120,
+				}),
+			),
+			'invalid_claims',
+		);
+	});
+
+	it('rejects assertions whose payload is not a JSON object with reason "verification_failed"', async () => {
+		mockJwks([publicJwk]);
+
+		// jose's SignJWT only accepts object payloads, so reach for the lower-level CompactSign to sign a raw JSON
+		// number. The header passes validateAssertionHeader, the signature is valid, but jose throws JWTInvalid when
+		// it sees the payload is not a top-level object -- which is exactly the unclassified case the fallback exists
+		// to honestly label.
+		const assertion = await new CompactSign(new TextEncoder().encode('42'))
+			.setProtectedHeader({ alg: 'RS256', kid: 'key-1', typ: 'JWT' })
+			.sign(privateKey);
+
+		await expectInvalidClient(verify(assertion), 'verification_failed');
 	});
 
 	it('refetches once for an unknown kid and succeeds after key rotation', async () => {
