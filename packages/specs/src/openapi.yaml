@@ -97,10 +97,20 @@ tags:
     description: Directus comes with various utility endpoints you can use to simplify your development flow.
     x-authentication: user
     x-schemas:
+      - Dashboards
       - Files
       - Folders
+      - Panels
       - Users
       - Roles
+  - name: Dashboards
+    description:
+      Dashboards provide a way to organize Insights panels into a single view.
+    x-collection: directus_dashboards
+  - name: Panels
+    description:
+      Panels are visualizations within a dashboard that display data from the API.
+    x-collection: directus_panels
   - name: Versions
     description:
       Enables users to create unpublished copies of an item, modify them independently from the main version, and
@@ -190,6 +200,18 @@ paths:
     $ref: './paths/folders/folders.yaml'
   /folders/{id}:
     $ref: './paths/folders/folder.yaml'
+
+  # Dashboards
+  /dashboards:
+    $ref: './paths/dashboards/dashboards.yaml'
+  /dashboards/{id}:
+    $ref: './paths/dashboards/dashboard.yaml'
+
+  # Panels
+  /panels:
+    $ref: './paths/panels/panels.yaml'
+  /panels/{id}:
+    $ref: './paths/panels/panel.yaml'
 
   # Operations
   /operations:
@@ -299,12 +321,16 @@ components:
       $ref: './components/extension.yaml'
     Fields:
       $ref: './components/field.yaml'
+    Dashboards:
+      $ref: './components/dashboard.yaml'
     Files:
       $ref: './components/file.yaml'
     Flows:
       $ref: './components/flow.yaml'
     Folders:
       $ref: './components/folder.yaml'
+    Panels:
+      $ref: './components/panel.yaml'
     Items:
       $ref: './components/item.yaml'
     Operations:

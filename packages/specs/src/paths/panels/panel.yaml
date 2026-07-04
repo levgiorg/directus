@@ -1,0 +1,106 @@
+get:
+  summary: Retrieve a Panel
+  description: Retrieve a single panel by unique identifier.
+  operationId: getPanel
+  parameters:
+    - $ref: '../../openapi.yaml#/components/parameters/Fields'
+    - $ref: '../../openapi.yaml#/components/parameters/Meta'
+  responses:
+    '200':
+      description: Successful request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: '../../openapi.yaml#/components/schemas/Panels'
+    '401':
+      $ref: '../../openapi.yaml#/components/responses/UnauthorizedError'
+    '404':
+      $ref: '../../openapi.yaml#/components/responses/NotFoundError'
+  tags:
+    - Panels
+
+patch:
+  summary: Update a Panel
+  description: Update an existing panel
+  operationId: updatePanel
+  parameters:
+    - $ref: '../../openapi.yaml#/components/parameters/Fields'
+    - $ref: '../../openapi.yaml#/components/parameters/Meta'
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            name:
+              type: string
+              description: Name of the panel.
+            icon:
+              type: string
+              description: Icon of the panel.
+            type:
+              type: string
+              description: Type of the panel.
+            dashboard:
+              type: string
+              description: Dashboard this panel belongs to.
+            color:
+              type: string
+              description: Color of the panel.
+            note:
+              type: string
+              description: Note of the panel.
+            show_header:
+              type: boolean
+              description: Show the panel header.
+            position_x:
+              type: integer
+              description: X position of the panel.
+            position_y:
+              type: integer
+              description: Y position of the panel.
+            width:
+              type: integer
+              description: Width of the panel.
+            height:
+              type: integer
+              description: Height of the panel.
+            options:
+              type: object
+              description: Options of the panel.
+  responses:
+    '200':
+      description: Successful request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: '../../openapi.yaml#/components/schemas/Panels'
+    '401':
+      $ref: '../../openapi.yaml#/components/responses/UnauthorizedError'
+    '404':
+      $ref: '../../openapi.yaml#/components/responses/NotFoundError'
+  tags:
+    - Panels
+
+delete:
+  summary: Delete a Panel
+  description: Delete an existing panel
+  operationId: deletePanel
+  responses:
+    '200':
+      description: Successful request
+    '401':
+      $ref: '../../openapi.yaml#/components/responses/UnauthorizedError'
+    '404':
+      $ref: '../../openapi.yaml#/components/responses/NotFoundError'
+  tags:
+    - Panels
+
+parameters:
+  - $ref: '../../openapi.yaml#/components/parameters/UUId'

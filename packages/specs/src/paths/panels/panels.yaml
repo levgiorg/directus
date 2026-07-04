@@ -1,0 +1,195 @@
+get:
+  summary: List Panels
+  description: List the panels.
+  operationId: getPanels
+  parameters:
+    - $ref: '../../openapi.yaml#/components/parameters/Fields'
+    - $ref: '../../openapi.yaml#/components/parameters/Limit'
+    - $ref: '../../openapi.yaml#/components/parameters/Offset'
+    - $ref: '../../openapi.yaml#/components/parameters/Sort'
+    - $ref: '../../openapi.yaml#/components/parameters/Filter'
+    - $ref: '../../openapi.yaml#/components/parameters/Search'
+    - $ref: '../../openapi.yaml#/components/parameters/Meta'
+  responses:
+    '200':
+      description: Successful request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '../../openapi.yaml#/components/schemas/Panels'
+              meta:
+                $ref: '../../openapi.yaml#/components/schemas/x-metadata'
+    '401':
+      $ref: '../../openapi.yaml#/components/responses/UnauthorizedError'
+    '404':
+      $ref: '../../openapi.yaml#/components/responses/NotFoundError'
+  tags:
+    - Panels
+
+post:
+  summary: Create a Panel
+  description: Create a new panel.
+  operationId: createPanel
+  parameters:
+    - $ref: '../../openapi.yaml#/components/parameters/Fields'
+    - $ref: '../../openapi.yaml#/components/parameters/Meta'
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            name:
+              type: string
+              example: My Panel
+              description: Name of the panel.
+            icon:
+              type: string
+              example: chart
+              description: Icon of the panel.
+            type:
+              type: string
+              example: pie-chart
+              description: Type of the panel.
+            dashboard:
+              type: string
+              description: Dashboard this panel belongs to.
+            color:
+              type: string
+              example: '#00ff00'
+              description: Color of the panel.
+            note:
+              type: string
+              description: Note of the panel.
+            show_header:
+              type: boolean
+              description: Show the panel header.
+            position_x:
+              type: integer
+              description: X position of the panel.
+            position_y:
+              type: integer
+              description: Y position of the panel.
+            width:
+              type: integer
+              description: Width of the panel.
+            height:
+              type: integer
+              description: Height of the panel.
+            options:
+              type: object
+              description: Options of the panel.
+          required: [name, type, dashboard]
+  responses:
+    '200':
+      description: Successful request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: '../../openapi.yaml#/components/schemas/Panels'
+    '401':
+      $ref: '../../openapi.yaml#/components/responses/UnauthorizedError'
+    '404':
+      $ref: '../../openapi.yaml#/components/responses/NotFoundError'
+  tags:
+    - Panels
+
+patch:
+  summary: Update Multiple Panels
+  description: Update multiple panels at the same time.
+  tags:
+    - Panels
+  operationId: updatePanels
+  parameters:
+    - $ref: '../../openapi.yaml#/components/parameters/Fields'
+    - $ref: '../../openapi.yaml#/components/parameters/Limit'
+    - $ref: '../../openapi.yaml#/components/parameters/Meta'
+    - $ref: '../../openapi.yaml#/components/parameters/Offset'
+    - $ref: '../../openapi.yaml#/components/parameters/Sort'
+    - $ref: '../../openapi.yaml#/components/parameters/Filter'
+    - $ref: '../../openapi.yaml#/components/parameters/Search'
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            data:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Name of the panel.
+                icon:
+                  type: string
+                  description: Icon of the panel.
+                type:
+                  type: string
+                  description: Type of the panel.
+                dashboard:
+                  type: string
+                  description: Dashboard this panel belongs to.
+                color:
+                  type: string
+                  description: Color of the panel.
+                note:
+                  type: string
+                  description: Note of the panel.
+                show_header:
+                  type: boolean
+                  description: Show the panel header.
+                position_x:
+                  type: integer
+                  description: X position of the panel.
+                position_y:
+                  type: integer
+                  description: Y position of the panel.
+                width:
+                  type: integer
+                  description: Width of the panel.
+                height:
+                  type: integer
+                  description: Height of the panel.
+                options:
+                  type: object
+                  description: Options of the panel.
+            keys:
+              type: array
+              items:
+                type: string
+  responses:
+    '200':
+      description: Successful request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '../../openapi.yaml#/components/schemas/Panels'
+              meta:
+                $ref: '../../openapi.yaml#/components/schemas/x-metadata'
+    '401':
+      $ref: '../../openapi.yaml#/components/responses/UnauthorizedError'
+
+delete:
+  summary: Delete Multiple Panels
+  description: Delete multiple existing panels.
+  tags:
+    - Panels
+  operationId: deletePanels
+  responses:
+    '200':
+      description: Successful request
+    '401':
+      $ref: '../../openapi.yaml#/components/responses/UnauthorizedError'

@@ -1,0 +1,83 @@
+get:
+  summary: Retrieve a Dashboard
+  description: Retrieve a single dashboard by unique identifier.
+  operationId: getDashboard
+  parameters:
+    - $ref: '../../openapi.yaml#/components/parameters/Fields'
+    - $ref: '../../openapi.yaml#/components/parameters/Meta'
+  responses:
+    '200':
+      description: Successful request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: '../../openapi.yaml#/components/schemas/Dashboards'
+    '401':
+      $ref: '../../openapi.yaml#/components/responses/UnauthorizedError'
+    '404':
+      $ref: '../../openapi.yaml#/components/responses/NotFoundError'
+  tags:
+    - Dashboards
+
+patch:
+  summary: Update a Dashboard
+  description: Update an existing dashboard
+  operationId: updateDashboard
+  parameters:
+    - $ref: '../../openapi.yaml#/components/parameters/Fields'
+    - $ref: '../../openapi.yaml#/components/parameters/Meta'
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            name:
+              type: string
+              description: Name of the dashboard.
+            icon:
+              type: string
+              description: Icon of the dashboard.
+            note:
+              type: string
+              description: Note of the dashboard.
+            color:
+              type: string
+              example: '#00ff00'
+              description: Color of the dashboard.
+  responses:
+    '200':
+      description: Successful request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: '../../openapi.yaml#/components/schemas/Dashboards'
+    '401':
+      $ref: '../../openapi.yaml#/components/responses/UnauthorizedError'
+    '404':
+      $ref: '../../openapi.yaml#/components/responses/NotFoundError'
+  tags:
+    - Dashboards
+
+delete:
+  summary: Delete a Dashboard
+  description: Delete an existing dashboard
+  operationId: deleteDashboard
+  responses:
+    '200':
+      description: Successful request
+    '401':
+      $ref: '../../openapi.yaml#/components/responses/UnauthorizedError'
+    '404':
+      $ref: '../../openapi.yaml#/components/responses/NotFoundError'
+  tags:
+    - Dashboards
+
+parameters:
+  - $ref: '../../openapi.yaml#/components/parameters/UUId'

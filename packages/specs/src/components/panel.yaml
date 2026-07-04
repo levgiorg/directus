@@ -1,0 +1,52 @@
+type: object
+properties:
+  id:
+    description: Unique identifier for the panel.
+    example: 0cf0e03d-4364-45df-b77b-ca61f61869d2
+    type: string
+  name:
+    description: Name of the panel.
+    example: My Panel
+    type: string
+  icon:
+    description: Icon of the panel.
+    example: chart
+    type: string
+    nullable: true
+  color:
+    description: Color of the panel.
+    example: '#00ff00'
+    type: string
+    nullable: true
+  note:
+    description: Note of the panel.
+    type: string
+    nullable: true
+  type:
+    description: Type of the panel.
+    example: pie-chart
+    type: string
+  show_header:
+    description: Show the panel header.
+    example: false
+    type: boolean
+  position_x:
+    description: X position of the panel.
+    example: 0
+    type: integer
+  position_y:
+    description: Y position of the panel.
+    example: 0
+    type: integer
+  width:
+    description: Width of the panel.
+    example: 6
+    type: integer
+  height:
+    description: Height of the panel.
+    example: 4
+    type: integer
+  options:
+    description: Options of the panel.
+    type: object
+    nullable: true
